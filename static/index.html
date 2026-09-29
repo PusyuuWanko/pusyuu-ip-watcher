@@ -40,6 +40,11 @@
   <section class="actions">
     <button id="recheck-btn">今すぐ再チェック</button>
     <button id="mute-toggle" title="アラート音のミュート切替">🔊</button>
+    <label class="volume-control" title="アラート音の音量 (指を離すと試聴音が鳴ります)">
+      音量
+      <input type="range" id="volume-slider" min="0" max="100" step="5" aria-label="アラート音の音量">
+      <span id="volume-value">40%</span>
+    </label>
     <button id="settings-btn" title="通知設定">⚙️ 設定</button>
     <span id="countdown"></span>
     <span id="error-banner" class="error hidden"></span>
@@ -47,12 +52,14 @@
 
   <section class="history">
     <h2>ドメイン別の解決結果 <span class="small-note">（dns_targets.json に登録された全ドメイン）</span></h2>
-    <table>
-      <thead>
-        <tr><th>ドメイン</th><th>Provider</th><th>解決IP</th><th>状態</th></tr>
-      </thead>
-      <tbody id="domains-body"><tr><td colspan="4">確認中...</td></tr></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>ドメイン</th><th>Provider</th><th>解決IP</th><th>状態</th></tr>
+        </thead>
+        <tbody id="domains-body"><tr><td colspan="4">確認中...</td></tr></tbody>
+      </table>
+    </div>
   </section>
 
   <section class="card dns-targets-card">
@@ -75,12 +82,14 @@
 
   <section class="history">
     <h2>IP履歴</h2>
-    <table>
-      <thead>
-        <tr><th>時刻</th><th>グローバルIP</th><th>不一致ドメイン</th><th>状態</th></tr>
-      </thead>
-      <tbody id="history-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>時刻</th><th>グローバルIP</th><th>不一致ドメイン</th><th>状態</th></tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
   </section>
 
   <h2 class="section-title">サーバー状態 <span class="small-note">(<code id="server-status-url">-</code>)</span></h2>
@@ -114,12 +123,14 @@
 
   <section class="history">
     <h2>サーバー状態履歴</h2>
-    <table>
-      <thead>
-        <tr><th>時刻</th><th>HTTP</th><th>電源</th><th>CPU%</th><th>メモリ%</th><th>ディスク%</th></tr>
-      </thead>
-      <tbody id="server-history-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>時刻</th><th>HTTP</th><th>電源</th><th>CPU%</th><th>メモリ%</th><th>ディスク%</th></tr>
+        </thead>
+        <tbody id="server-history-body"></tbody>
+      </table>
+    </div>
   </section>
 </main>
 
@@ -128,7 +139,7 @@
 <div id="settings-modal-overlay" class="modal-overlay hidden">
   <div class="modal settings-modal">
     <h2>⚙️ 通知設定</h2>
-    <p class="settings-hint">異常の種類ごとに、表示のON/OFF・音のON/OFF・しきい値を設定できます。</p>
+    <p class="settings-hint">異常の種類ごとに、表示のON/OFF・音のON/OFF・しきい値を設定できます。音量は画面上部の「音量」スライダーで調整できます。</p>
     <div class="settings-list" id="settings-list"></div>
     <div class="settings-actions">
       <button id="settings-reset-btn" class="secondary">初期値に戻す</button>

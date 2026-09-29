@@ -543,4 +543,14 @@ if __name__ == "__main__":
     parser.add_argument("--host", default=os.getenv("WATCHER_HOST", "127.0.0.1"))
     parser.add_argument("--port", type=int, default=int(os.getenv("WATCHER_PORT", "8000")))
     args = parser.parse_args()
+
+    # 0.0.0.0 / :: are listen-only addresses; a browser on this machine uses loopback.
+    browse_host = {"0.0.0.0": "127.0.0.1", "::": "[::1]"}.get(args.host, args.host)
+    if ":" in browse_host and not browse_host.startswith("["):
+        browse_host = f"[{browse_host}]"
+    print(f"Open http://{browse_host}:{args.port}/ in your browser.")
+    print(f"The setup/operation guide is available at http://{browse_host}:{args.port}/guide")
+    if args.host not in ("127.0.0.1", "localhost", "::1"):
+        print(f"Listening on {args.host}: other devices on the network can open this page.")
+    print("Press Ctrl+C to stop.\n", flush=True)
     uvicorn.run("main:app", host=args.host, port=args.port)

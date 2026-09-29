@@ -86,11 +86,8 @@ if errorlevel 1 goto :failed
 
 echo.
 echo Starting server...
-echo Open http://127.0.0.1:8000/ in your browser.
-echo The setup/operation guide is available at http://127.0.0.1:8000/guide
-echo Press Ctrl+C to stop.
-echo.
-".venv\Scripts\python.exe" main.py --host 127.0.0.1 --port 8000
+rem Host and port come from WATCHER_HOST / WATCHER_PORT in .env.
+".venv\Scripts\python.exe" main.py
 exit /b %errorlevel%
 
 :failed

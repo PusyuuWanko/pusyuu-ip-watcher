@@ -92,6 +92,7 @@ main {
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
@@ -127,13 +128,21 @@ button:hover { filter: brightness(1.08); }
   font-size: 1.1rem;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+/* 狭い画面では表だけを横スクロールさせ、ページ全体ははみ出さないようにする */
+.table-scroll {
+  overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-scroll tr:last-child td {
+  border-bottom: none;
 }
 
 th, td {
@@ -146,6 +155,7 @@ th, td {
 th {
   color: var(--muted);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 tr.row-alert td {
@@ -183,6 +193,25 @@ tr.row-alert td {
   border-color: var(--alert);
 }
 
+.volume-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.volume-control input[type="range"] {
+  width: 120px;
+  accent-color: var(--accent);
+}
+
+#volume-value {
+  min-width: 3em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .hidden { display: none !important; }
 
 .section-title {
@@ -190,6 +219,10 @@ tr.row-alert td {
   margin: 2rem auto 1rem;
   padding: 0 2rem;
   font-size: 1.2rem;
+}
+
+.section-title code {
+  overflow-wrap: anywhere;
 }
 
 #alert-windows-container {
@@ -201,7 +234,7 @@ tr.row-alert td {
 
 .alert-window {
   position: fixed;
-  width: 320px;
+  width: min(320px, calc(100vw - 16px));
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -336,3 +369,11 @@ tr.row-alert td {
 
 .dns-update-detail{font-size:.85rem;line-height:1.55;margin-top:8px;color:#666}.dns-update-detail div{margin:3px 0}.dns-update-detail a{display:inline-block;margin-top:5px}.dns-update-detail strong{color:inherit}
 .dns-targets-card{margin-bottom:1rem}.dns-target-list{margin:.5rem 0;padding-left:1.4rem}.dns-target-list ul{margin:.25rem 0;padding-left:1.4rem}.small-note{font-size:.85rem;color:#666}
+
+@media (max-width: 600px) {
+  header { padding: 1rem 1rem 0.75rem; }
+  main { padding: 0 1rem 2rem; }
+  .section-title { padding: 0 1rem; }
+  th, td { padding: 0.5rem 0.6rem; }
+  .modal { padding: 1.25rem; }
+}

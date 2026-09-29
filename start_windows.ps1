@@ -48,9 +48,6 @@ if ($LASTEXITCODE -ne 0) { throw "Dependency installation failed." }
 
 Write-Host ""
 Write-Host "Starting server..."
-Write-Host "Open http://127.0.0.1:8000/ in your browser."
-Write-Host "Guide: http://127.0.0.1:8000/guide"
-Write-Host "Press Ctrl+C to stop."
-Write-Host ""
-& ".\.venv\Scripts\python.exe" main.py --host 127.0.0.1 --port 8000
+# Host and port come from WATCHER_HOST / WATCHER_PORT in .env.
+& ".\.venv\Scripts\python.exe" main.py
 exit $LASTEXITCODE

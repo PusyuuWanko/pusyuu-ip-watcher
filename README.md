@@ -29,10 +29,30 @@ https://www.python.org/downloads/windows/
 ./start_linux_mac.sh
 ```
 
-Pythonが無ければ、インストールするか確認します。
+実行権限が無いと言われた場合は `bash start_linux_mac.sh` で起動できます。
 
-- Debian / Ubuntu: `apt-get`
-- macOS: Homebrew
+1. `python3` / `python` を探す（**Python 3.10以上**が必要。古いものしか無い場合も未検出扱い）
+2. 見つからなければPythonをインストールするか確認
+3. `Y`ならOSのパッケージマネージャーでPythonをインストール
+   - Debian / Ubuntu: `apt-get`
+   - Fedora / RHEL: `dnf` / `yum`
+   - Arch: `pacman`
+   - openSUSE: `zypper`
+   - Alpine: `apk`
+   - macOS: Homebrew
+4. `.venv` を作成（Debian/Ubuntuで `venv` モジュールが無い場合は `python3.x-venv` のインストールも確認。壊れた `.venv` は作り直し）
+5. `requirements.txt` をインストール
+6. `.env` がなければ `.env.example` から作成
+7. アプリを起動
+
+うまく起動しない場合は `./check_python.sh` で診断できます。
+
+Pythonを手動インストールする場合:
+
+- macOS: https://www.python.org/downloads/macos/
+- Linux: ディストリビューションのパッケージマネージャー、または https://www.python.org/downloads/source/
+
+WindowsとLinux(WSL含む)で同じフォルダを共有している場合、Windowsで作られた `.venv` はLinuxでは使えません。フォルダを分けてください。
 
 ---
 
@@ -81,6 +101,30 @@ XSERVER_API_KEY=ここにAPIキー
 `XSERVER_MIN_SYNC_INTERVAL_SECONDS` はDNSキャッシュによる連続同期を避けるための間隔で、初期値は300秒です。
 
 APIキー本体は `dns_targets.json` に保存しません。
+
+### 待ち受けアドレスとポート
+
+Web画面をどのアドレス・ポートで開くかは `.env` で変えられます。起動スクリプト(`start_windows.cmd` / `start_windows.ps1` / `start_linux_mac.sh`)はこの値で起動し、開くべきURLを起動時に表示します。
+
+```dotenv
+WATCHER_HOST=127.0.0.1
+WATCHER_PORT=8000
+```
+
+| 項目 | 初期値 | 説明 |
+|---|---|---|
+| `WATCHER_HOST` | `127.0.0.1` | `127.0.0.1` ならこのPCからだけ開けます。`0.0.0.0` にすると同じLAN内のスマホや別PCから `http://<このPCのIP>:<ポート>/` で開けます |
+| `WATCHER_PORT` | `8000` | 8000番が他のアプリと衝突する場合に変更します(例: `8080`) |
+
+**注意:** Web画面には認証がありません。`0.0.0.0` にするのは信頼できる家庭内LANだけにし、ルーターでこのポートを外部に開放しないでください。LAN内の他の端末から開けない場合は、OSのファイアウォールでこのポートの受信を許可してください。
+
+一時的に変えたいときは、コマンドラインで指定することもできます(`.env` より優先されます)。
+
+```bash
+python main.py --host 0.0.0.0 --port 8080
+```
+
+優先順位は コマンドライン引数 → `.env` → 初期値(`127.0.0.1` / `8000`)です。
 
 ---
 
@@ -256,6 +300,8 @@ MyDNS ProviderではDNSレコードを作成・削除・個別選択すること
 ---
 
 ## 8. 起動後の画面
+
+初期設定の場合(`WATCHER_HOST` / `WATCHER_PORT` を変えた場合は、起動時に表示されるURLを開いてください):
 
 ```text
 http://127.0.0.1:8000/

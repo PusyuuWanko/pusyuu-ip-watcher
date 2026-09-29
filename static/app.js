@@ -85,8 +85,21 @@ let settings = loadSettings();
 
 // --- アラート音 (Web Audio API のオシレーターでビープ音を生成、種類ごとに独立して鳴らせる) ---
 let audioCtx = null;
-const activeTones = new Map(); // alertId -> { oscillator, gainNode, intervalId }
+const activeTones = new Map(); // alertId -> { oscillator, gainNode, intervalId, on }
 let userMuted = localStorage.getItem("ipwatcher:muted") === "1";
+
+// 音量 (0〜100%)。初期値40%で従来の音量 (gain 0.12) と同じになる
+const VOLUME_STORAGE_KEY = "ipwatcher:volume";
+const DEFAULT_VOLUME = 40;
+const MAX_GAIN = 0.3;
+let volumePercent = (() => {
+  const stored = parseInt(localStorage.getItem(VOLUME_STORAGE_KEY), 10);
+  return Number.isFinite(stored) ? Math.min(100, Math.max(0, stored)) : DEFAULT_VOLUME;
+})();
+
+function currentGain() {
+  return (MAX_GAIN * volumePercent) / 100;
+}
 
 function ensureAudioContext() {
   if (!audioCtx) {
@@ -112,18 +125,46 @@ function startTone(alertId, toneDef) {
   const gainNode = ctx.createGain();
   oscillator.type = toneDef.type;
   oscillator.frequency.value = toneDef.freq;
-  gainNode.gain.value = 0.12;
+  gainNode.gain.value = currentGain();
   oscillator.connect(gainNode);
   gainNode.connect(ctx.destination);
   oscillator.start();
 
-  let on = true;
-  const intervalId = setInterval(() => {
-    on = !on;
-    gainNode.gain.value = on ? 0.12 : 0;
+  const tone = { oscillator, gainNode, intervalId: null, on: true };
+  tone.intervalId = setInterval(() => {
+    tone.on = !tone.on;
+    gainNode.gain.value = tone.on ? currentGain() : 0;
   }, toneDef.intervalMs);
 
-  activeTones.set(alertId, { oscillator, gainNode, intervalId });
+  activeTones.set(alertId, tone);
+}
+
+// 鳴っている途中のアラート音にも新しい音量を即座に反映する
+function applyVolumeToActiveTones() {
+  for (const tone of activeTones.values()) {
+    if (tone.on) tone.gainNode.gain.value = currentGain();
+  }
+}
+
+// 音量調整時の試聴用に短いビープを1回鳴らす
+function playPreviewBeep() {
+  if (userMuted || volumePercent === 0) return;
+  const ctx = ensureAudioContext();
+  ctx.resume().then(() => {
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.type = "square";
+    oscillator.frequency.value = 880;
+    gainNode.gain.value = currentGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      gainNode.disconnect();
+    };
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.25);
+  }).catch(() => {});
 }
 
 function stopTone(alertId) {
@@ -176,6 +217,24 @@ el("audio-unlock-btn").addEventListener("click", () => {
 });
 
 updateMuteButton();
+
+function updateVolumeLabel() {
+  el("volume-value").textContent = `${volumePercent}%`;
+}
+
+el("volume-slider").value = volumePercent;
+updateVolumeLabel();
+
+el("volume-slider").addEventListener("input", (event) => {
+  volumePercent = parseInt(event.target.value, 10);
+  updateVolumeLabel();
+  applyVolumeToActiveTones();
+});
+
+el("volume-slider").addEventListener("change", () => {
+  localStorage.setItem(VOLUME_STORAGE_KEY, String(volumePercent));
+  if (activeTones.size === 0) playPreviewBeep();
+});
 
 // --- 設定モーダル ---
 function renderSettingsList() {
@@ -328,8 +387,10 @@ function createAlertWindowElement(alertId, title) {
 
   makeDraggable(windowEl, header);
 
+  // 狭い画面 (スマホ) でもウィンドウが画面外にはみ出さないよう位置を収める
   const offset = (cascadeIndex % 6) * 32;
-  windowEl.style.left = `${24 + offset}px`;
+  const windowWidth = Math.min(320, window.innerWidth - 16);
+  windowEl.style.left = `${Math.max(8, Math.min(24 + offset, window.innerWidth - windowWidth - 8))}px`;
   windowEl.style.top = `${88 + offset}px`;
   cascadeIndex += 1;
 
