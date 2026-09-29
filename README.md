@@ -86,7 +86,38 @@ APIキー本体は `dns_targets.json` に保存しません。
 
 ## 4. `dns_targets.json` を設定
 
-ここがv4の中心です。
+ここがの中心です。
+
+### サーバー状態APIのURLをJSONで指定
+
+サーバーに設置するAPIのJSON形式は以下の様な形式にしてください`※このサーバー状態APIそのものはこのプロジェクトにはありません、ご自身のサーバーにこの形式で設置してください`。
+
+```json
+{
+  "power": "AC",
+  "battery": null,
+  "status": null,
+  "remaining_hours": null,
+  "cpu_percent": 5,
+  "memory_percent": 78.38,
+  "memory_used_gb": 2.24,
+  "memory_total_gb": 2.86,
+  "disk_percent": 18.93,
+  "disk_used_gb": 86.47,
+  "disk_total_gb": 456.88
+}
+```
+
+APIを設置済みのサーバーでは、例えばこのようにURLの部分はあなたの物を指定してください。
+```json
+"server_status": {
+  "enabled": true,
+  "url": "https://pusyuuwanko.com/server_status",
+  "timeout_seconds": 10
+}
+```
+
+優先順位は `dns_targets.json` の `server_status.url` → `.env` の `SERVER_STATUS_URL` → 既定値 です。`enabled: false` でサーバー状態チェックを止められます。
 
 初期状態は安全のためXServerが無効です。
 
