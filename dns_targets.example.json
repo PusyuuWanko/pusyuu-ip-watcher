@@ -1,0 +1,38 @@
+{
+  "server_status": {
+    "enabled": true,
+    "url": "https://pusyuuwanko.com/server_status",
+    "timeout_seconds": 10
+  },
+  "xserver": {
+    "enabled": true,
+    "domains": [
+      {
+        "domain": "pusyuuwanko.com",
+        "records": [
+          {"host": "@", "type": "A", "auto_update": true},
+          {"host": "yesReIP", "type": "A", "auto_update": true},
+          {"host": "noenReIP", "type": "A", "auto_update": false}
+        ]
+      },
+      {
+        "domain": "pusyuu.com",
+        "records": [
+          {"host": "@", "type": "A", "auto_update": true}
+        ]
+      },
+      {
+        "domain": "isami.moe",
+        "records": [
+          {"host": "@", "type": "A", "auto_update": true}
+        ]
+      }
+    ]
+  },
+  "mydns": {
+    "enabled": false,
+    "watch_domains": [
+      "example.mydns.jp"
+    ]
+  }
+}

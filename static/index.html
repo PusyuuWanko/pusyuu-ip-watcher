@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Watcher</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="audio-unlock-banner" class="audio-unlock hidden">
+  <span>🔇 ブラウザの制限によりアラート音がブロックされています。クリックして音声を有効にしてください。</span>
+  <button id="audio-unlock-btn">🔔 音声を有効にする</button>
+</div>
+
+<header>
+  <h1>IP Watcher</h1>
+  <p class="domain">監視対象ドメイン: <code id="domain">-</code>　<a href="/guide#2-xserver-apiを設定する" target="_blank">📖 使い方・設定ガイド</a></p>
+</header>
+
+<main>
+  <section class="status-grid">
+    <div class="card" id="card-match">
+      <span class="label">DNS一致状態</span>
+      <span class="value" id="match-value">確認中...</span>
+    </div>
+    <div class="card">
+      <span class="label">現地グローバルIP</span>
+      <span class="value" id="global-ip">-</span>
+    </div>
+    <div class="card">
+      <span class="label">監視ドメインの一致数</span>
+      <span class="value" id="domain-ip">-</span>
+    </div>
+    <div class="card">
+      <span class="label">最終チェック</span>
+      <span class="value" id="last-checked">-</span>
+    </div>
+  </section>
+
+  <section class="actions">
+    <button id="recheck-btn">今すぐ再チェック</button>
+    <button id="mute-toggle" title="アラート音のミュート切替">🔊</button>
+    <button id="settings-btn" title="通知設定">⚙️ 設定</button>
+    <span id="countdown"></span>
+    <span id="error-banner" class="error hidden"></span>
+  </section>
+
+  <section class="history">
+    <h2>ドメイン別の解決結果 <span class="small-note">（dns_targets.json に登録された全ドメイン）</span></h2>
+    <table>
+      <thead>
+        <tr><th>ドメイン</th><th>Provider</th><th>解決IP</th><th>状態</th></tr>
+      </thead>
+      <tbody id="domains-body"><tr><td colspan="4">確認中...</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="card dns-targets-card">
+    <div class="label">DNS Provider / 自動更新対象</div>
+    <div id="dns-provider-targets">読み込み中...</div>
+    <p class="small-note">ドメインがAPIキーの操作範囲内でも、<code>auto_update=true</code> のレコードだけが変更対象です。</p>
+  </section>
+
+  <section class="status-grid">
+    <div class="card" id="card-dns-update">
+      <span class="label">DNS自動更新</span>
+      <span class="value" id="dns-update-status">確認中...</span>
+    </div>
+    <div class="card">
+      <span class="label">DNS更新内容</span>
+      <span class="value" id="dns-update-message">-</span>
+      <div id="dns-update-detail" class="dns-update-detail"></div>
+    </div>
+  </section>
+
+  <section class="history">
+    <h2>IP履歴</h2>
+    <table>
+      <thead>
+        <tr><th>時刻</th><th>グローバルIP</th><th>不一致ドメイン</th><th>状態</th></tr>
+      </thead>
+      <tbody id="history-body"></tbody>
+    </table>
+  </section>
+
+  <h2 class="section-title">サーバー状態 <span class="small-note">(<code id="server-status-url">-</code>)</span></h2>
+
+  <section class="status-grid">
+    <div class="card" id="card-http">
+      <span class="label">HTTP応答</span>
+      <span class="value" id="http-status">確認中...</span>
+    </div>
+    <div class="card" id="card-power">
+      <span class="label">電源</span>
+      <span class="value" id="power-value">-</span>
+    </div>
+    <div class="card" id="card-battery">
+      <span class="label">バッテリー / 残り時間</span>
+      <span class="value" id="battery-value">-</span>
+    </div>
+    <div class="card" id="card-cpu">
+      <span class="label">CPU使用率</span>
+      <span class="value" id="cpu-value">-</span>
+    </div>
+    <div class="card" id="card-memory">
+      <span class="label">メモリ使用率</span>
+      <span class="value" id="memory-value">-</span>
+    </div>
+    <div class="card" id="card-disk">
+      <span class="label">ディスク使用率</span>
+      <span class="value" id="disk-value">-</span>
+    </div>
+  </section>
+
+  <section class="history">
+    <h2>サーバー状態履歴</h2>
+    <table>
+      <thead>
+        <tr><th>時刻</th><th>HTTP</th><th>電源</th><th>CPU%</th><th>メモリ%</th><th>ディスク%</th></tr>
+      </thead>
+      <tbody id="server-history-body"></tbody>
+    </table>
+  </section>
+</main>
+
+<div id="alert-windows-container"></div>
+
+<div id="settings-modal-overlay" class="modal-overlay hidden">
+  <div class="modal settings-modal">
+    <h2>⚙️ 通知設定</h2>
+    <p class="settings-hint">異常の種類ごとに、表示のON/OFF・音のON/OFF・しきい値を設定できます。</p>
+    <div class="settings-list" id="settings-list"></div>
+    <div class="settings-actions">
+      <button id="settings-reset-btn" class="secondary">初期値に戻す</button>
+      <button id="settings-close-btn">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --text: #1b2430;
+  --muted: #5b6a7d;
+  --border: #dfe4ea;
+  --accent: #2f6fed;
+  --ok: #1b8a5a;
+  --ok-bg: #e7f7ef;
+  --alert: #c4351b;
+  --alert-bg: #fdeceb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14181f;
+    --surface: #1d232c;
+    --text: #e7ecf3;
+    --muted: #93a1b4;
+    --border: #2b3341;
+    --accent: #5b8cff;
+    --ok: #3fce8f;
+    --ok-bg: #103324;
+    --alert: #ff6b57;
+    --alert-bg: #3a1712;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  padding: 1.5rem 2rem 1rem;
+}
+
+header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+}
+
+.domain code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 2rem 3rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.card .label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.card .value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.card.ok .value { color: var(--ok); }
+.card.alert .value { color: var(--alert); }
+.card.ok { background: var(--ok-bg); }
+.card.alert { background: var(--alert-bg); }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.08); }
+
+#countdown {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: var(--alert);
+  font-size: 0.9rem;
+}
+
+.history {
+  margin-bottom: 1.5rem;
+}
+
+.history h2 {
+  font-size: 1.1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+tr.row-alert td {
+  color: var(--alert);
+}
+
+.audio-unlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  background: var(--alert-bg);
+  color: var(--alert);
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.audio-unlock button {
+  background: var(--alert);
+}
+
+#mute-toggle {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 1.1rem;
+  padding: 0.5rem 0.75rem;
+}
+
+#mute-toggle.muted {
+  background: var(--alert-bg);
+  color: var(--alert);
+  border-color: var(--alert);
+}
+
+.hidden { display: none !important; }
+
+.section-title {
+  max-width: 960px;
+  margin: 2rem auto 1rem;
+  padding: 0 2rem;
+  font-size: 1.2rem;
+}
+
+#alert-windows-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.alert-window {
+  position: fixed;
+  width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.alert-window.dragging {
+  opacity: 0.4;
+}
+
+.alert-window-header {
+  background: var(--alert);
+  color: white;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  cursor: grab;
+  user-select: none;
+}
+
+.alert-window-header:active {
+  cursor: grabbing;
+}
+
+.alert-window-body {
+  padding: 1rem;
+}
+
+.alert-window-message {
+  white-space: pre-line;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0 0 0.9rem;
+}
+
+.alert-window-dismiss {
+  background: var(--alert);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.75rem;
+  max-width: 460px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.modal h2 {
+  margin-top: 0;
+}
+
+.settings-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: -0.5rem;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 1rem 0;
+}
+
+.settings-row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+}
+
+.settings-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+}
+
+.settings-row-header label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.settings-row-header .sound-toggle {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.settings-row-threshold {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.settings-row-threshold input[type="number"] {
+  width: 5rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.settings-actions button.secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.dns-update-detail{font-size:.85rem;line-height:1.55;margin-top:8px;color:#666}.dns-update-detail div{margin:3px 0}.dns-update-detail a{display:inline-block;margin-top:5px}.dns-update-detail strong{color:inherit}
+.dns-targets-card{margin-bottom:1rem}.dns-target-list{margin:.5rem 0;padding-left:1.4rem}.dns-target-list ul{margin:.25rem 0;padding-left:1.4rem}.small-note{font-size:.85rem;color:#666}
