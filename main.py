@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import mimetypes
 import os
 import re
 import html
@@ -532,6 +533,8 @@ async def get_config():
     }
 
 
+# 同梱フォント用。Windows のレジストリ次第で .woff2 が octet-stream になるため明示する
+mimetypes.add_type("font/woff2", ".woff2")
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 

@@ -1,62 +1,183 @@
-:root {
-  --bg: #f4f6f8;
-  --surface: #ffffff;
-  --text: #1b2430;
-  --muted: #5b6a7d;
-  --border: #dfe4ea;
-  --accent: #2f6fed;
-  --ok: #1b8a5a;
-  --ok-bg: #e7f7ef;
-  --alert: #c4351b;
-  --alert-bg: #fdeceb;
+/* ===== Cyber theme =====
+   パネルは半透明 (rgba) + backdrop-filter のブラー、角は左上と右下を斜めに切り落とす。
+   色は変数で持ち、状態 (ok / alert) では --panel / --edge / --glow を差し替えるだけで済むようにする。 */
+
+/* フォントは static/fonts に同梱 (SIL Open Font License 1.1、ライセンス文は同フォルダ)。
+   英数字 (latin) のみなので、日本語は font-family 後段のシステムフォントで表示される。 */
+@font-face {
+  font-family: "Orbitron";
+  src: url("fonts/orbitron-latin-800-normal.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14181f;
-    --surface: #1d232c;
-    --text: #e7ecf3;
-    --muted: #93a1b4;
-    --border: #2b3341;
-    --accent: #5b8cff;
-    --ok: #3fce8f;
-    --ok-bg: #103324;
-    --alert: #ff6b57;
-    --alert-bg: #3a1712;
-  }
+@font-face {
+  font-family: "Share Tech Mono";
+  src: url("fonts/share-tech-mono-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg: #04060d;
+  --grid: rgba(0, 240, 255, 0.07);
+  --text: #d6f5ff;
+  --muted: #74a6ba;
+  --accent: #00f0ff;
+  --accent-2: #ff2bd6;
+  --ok: #39ff9f;
+  --alert: #ff3b6b;
+
+  --panel: rgba(8, 20, 38, 0.55);
+  --edge: rgba(0, 240, 255, 0.45);
+  --glow: rgba(0, 240, 255, 0.08);
+  --line: rgba(0, 240, 255, 0.16);
+
+  --font-display: "Orbitron", "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  /* 日本語は等幅にすると字間が空きすぎるので、英数字だけ Share Tech Mono にして和文は通常のゴシックへ */
+  --font-mono: "Share Tech Mono", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, ui-monospace, monospace;
+  --font-body: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+html {
   background: var(--bg);
-  color: var(--text);
 }
 
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--text);
+  /* 背景色は html 側に置く (body に置くと z-index:-1 の背景レイヤーを覆ってしまう) */
+}
+
+/* 背景: グリッド + ネオンの光。パネルのブラー越しに色がにじんで見える */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 55% 45% at 12% 0%, rgba(0, 240, 255, 0.22), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 92% 28%, rgba(255, 43, 214, 0.18), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 45% 100%, rgba(96, 72, 255, 0.2), transparent 70%),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: auto, auto, auto, 32px 32px, 32px 32px;
+}
+
+/* 走査線 (ごく薄く) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(0, 240, 255, 0.5);
+}
+
+a:hover {
+  text-shadow: 0 0 8px var(--accent);
+}
+
+code {
+  font-family: var(--font-mono);
+}
+
+/* ===== 角を切り落とした半透明パネル (共通) ===== */
+.card,
+.table-scroll,
+.modal,
+.alert-window,
+.settings-row,
+button {
+  --cut: 14px;
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  background:
+    /* 切り落とした斜めの辺に枠線を描く (border は斜めに描けないため) */
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1.2px), transparent calc(50% + 1.2px))
+      top left / var(--cut) var(--cut) no-repeat border-box,
+    linear-gradient(to top left, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1.2px), transparent calc(50% + 1.2px))
+      bottom right / var(--cut) var(--cut) no-repeat border-box,
+    var(--panel);
+  clip-path: polygon(
+    var(--cut) 0, 100% 0,
+    100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+    0 100%, 0 var(--cut)
+  );
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 0 28px var(--glow);
+}
+
+/* backdrop-filter 非対応ブラウザでは読みやすさ優先で不透明度を上げる */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card, .table-scroll, .modal, .alert-window, .settings-row {
+    --panel: rgba(8, 20, 38, 0.92);
+  }
+}
+
+/* ===== ヘッダー ===== */
 header {
-  padding: 1.5rem 2rem 1rem;
+  padding: 1.75rem 2rem 1rem;
+  max-width: 1024px;
+  margin: 0 auto;
 }
 
 header h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.5rem;
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 240, 255, 0.8), 0 0 22px rgba(0, 240, 255, 0.45);
+}
+
+header h1::after {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 2px;
+  margin-top: 0.5rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2) 60%, transparent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.domain {
+  color: var(--muted);
+  margin: 0.6rem 0 0;
 }
 
 .domain code {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
+  color: var(--text);
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid var(--line);
+  padding: 0.1rem 0.45rem;
 }
 
 main {
-  max-width: 960px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 0 2rem 3rem;
 }
 
+/* ===== ステータスカード ===== */
 .status-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -65,31 +186,72 @@ main {
 }
 
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  position: relative;
   padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
+}
+
+/* 上辺右側のアクセントライン */
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 18px;
+  width: 42px;
+  height: 2px;
+  background: var(--edge);
+  box-shadow: 0 0 8px var(--edge);
 }
 
 .card .label {
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
   color: var(--muted);
 }
 
-.card .value {
-  font-size: 1.2rem;
-  font-weight: 600;
-  word-break: break-all;
+.card .label::before {
+  content: "// ";
+  color: var(--edge);
 }
 
-.card.ok .value { color: var(--ok); }
-.card.alert .value { color: var(--alert); }
-.card.ok { background: var(--ok-bg); }
-.card.alert { background: var(--alert-bg); }
+.card .value {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 10px rgba(214, 245, 255, 0.25);
+}
 
+.card.ok {
+  --panel: rgba(0, 60, 40, 0.45);
+  --edge: rgba(57, 255, 159, 0.6);
+  --glow: rgba(57, 255, 159, 0.12);
+}
+
+.card.alert {
+  --panel: rgba(70, 0, 25, 0.5);
+  --edge: rgba(255, 59, 107, 0.75);
+  --glow: rgba(255, 59, 107, 0.2);
+  animation: alert-pulse 1.6s ease-in-out infinite;
+}
+
+.card.ok .value {
+  color: var(--ok);
+  text-shadow: 0 0 10px rgba(57, 255, 159, 0.55);
+}
+
+.card.alert .value {
+  color: var(--alert);
+  text-shadow: 0 0 10px rgba(255, 59, 107, 0.6);
+}
+
+@keyframes alert-pulse {
+  50% { box-shadow: inset 0 0 36px rgba(255, 59, 107, 0.38); }
+}
+
+/* ===== 操作バー ===== */
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -99,18 +261,34 @@ main {
 }
 
 button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.1rem;
+  --cut: 9px;
+  --panel: rgba(0, 240, 255, 0.12);
+  --edge: rgba(0, 240, 255, 0.7);
+  --glow: rgba(0, 240, 255, 0.12);
+  color: var(--accent);
+  font-family: var(--font-body);
   font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.6rem 1.2rem;
   cursor: pointer;
+  transition: box-shadow 0.15s, color 0.15s, text-shadow 0.15s;
 }
 
-button:hover { filter: brightness(1.08); }
+button:hover {
+  --panel: rgba(0, 240, 255, 0.24);
+  color: #fff;
+  text-shadow: 0 0 8px var(--accent);
+  box-shadow: inset 0 0 22px rgba(0, 240, 255, 0.35);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
 
 #countdown {
+  font-family: var(--font-mono);
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -118,85 +296,25 @@ button:hover { filter: brightness(1.08); }
 .error {
   color: var(--alert);
   font-size: 0.9rem;
-}
-
-.history {
-  margin-bottom: 1.5rem;
-}
-
-.history h2 {
-  font-size: 1.1rem;
-}
-
-/* 狭い画面では表だけを横スクロールさせ、ページ全体ははみ出さないようにする */
-.table-scroll {
-  overflow-x: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table-scroll tr:last-child td {
-  border-bottom: none;
-}
-
-th, td {
-  text-align: left;
-  padding: 0.6rem 0.8rem;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
-}
-
-th {
-  color: var(--muted);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-tr.row-alert td {
-  color: var(--alert);
-}
-
-.audio-unlock {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-  background: var(--alert-bg);
-  color: var(--alert);
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.audio-unlock button {
-  background: var(--alert);
+  text-shadow: 0 0 8px rgba(255, 59, 107, 0.5);
 }
 
 #mute-toggle {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
   font-size: 1.1rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.8rem;
 }
 
 #mute-toggle.muted {
-  background: var(--alert-bg);
-  color: var(--alert);
-  border-color: var(--alert);
+  --panel: rgba(255, 59, 107, 0.16);
+  --edge: rgba(255, 59, 107, 0.8);
+  --glow: rgba(255, 59, 107, 0.2);
 }
 
 .volume-control {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: var(--font-mono);
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -209,14 +327,39 @@ tr.row-alert td {
 #volume-value {
   min-width: 3em;
   text-align: right;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 
 .hidden { display: none !important; }
 
+/* ===== 見出し ===== */
+.history {
+  margin-bottom: 1.5rem;
+}
+
+.history h2,
 .section-title {
-  max-width: 960px;
-  margin: 2rem auto 1rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.history h2::before,
+.section-title::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 0.55rem;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.section-title {
+  max-width: 1024px;
+  margin: 2.25rem auto 1rem;
   padding: 0 2rem;
   font-size: 1.2rem;
 }
@@ -225,6 +368,117 @@ tr.row-alert td {
   overflow-wrap: anywhere;
 }
 
+.small-note {
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--muted);
+}
+
+/* ===== 表 ===== */
+/* 狭い画面では表だけを横スクロールさせ、ページ全体ははみ出さないようにする */
+.table-scroll {
+  overflow-x: auto;
+  scrollbar-color: var(--edge) transparent;
+  scrollbar-width: thin;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+td {
+  font-family: var(--font-mono);
+  /* 表は枠内で横スクロールできるので、セル内では折り返さない (「一/致」の縦割れ防止) */
+  white-space: nowrap;
+}
+
+th {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  background: rgba(0, 240, 255, 0.06);
+}
+
+tbody tr:hover td {
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.table-scroll tr:last-child td {
+  border-bottom: none;
+}
+
+tr.row-alert td {
+  color: var(--alert);
+  background: rgba(255, 59, 107, 0.08);
+}
+
+/* ===== DNS Provider カード ===== */
+.dns-targets-card {
+  margin-bottom: 1rem;
+}
+
+.dns-target-list {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+}
+
+.dns-target-list ul {
+  margin: 0.25rem 0;
+  padding-left: 1.4rem;
+}
+
+.dns-target-list li::marker {
+  color: var(--accent);
+}
+
+.dns-update-detail {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.dns-update-detail div { margin: 3px 0; }
+.dns-update-detail a { display: inline-block; margin-top: 5px; }
+.dns-update-detail strong { color: var(--text); }
+
+/* ===== 音声ブロック通知 ===== */
+.audio-unlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  color: #ffd1ec;
+  background:
+    repeating-linear-gradient(-45deg, rgba(255, 43, 214, 0.12) 0 12px, transparent 12px 24px),
+    rgba(40, 0, 30, 0.7);
+  border-bottom: 1px solid rgba(255, 43, 214, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.audio-unlock button {
+  --panel: rgba(255, 43, 214, 0.18);
+  --edge: rgba(255, 43, 214, 0.85);
+  --glow: rgba(255, 43, 214, 0.2);
+  color: #ffd1ec;
+}
+
+/* ===== アラートウィンドウ ===== */
 #alert-windows-container {
   position: fixed;
   inset: 0;
@@ -233,12 +487,12 @@ tr.row-alert td {
 }
 
 .alert-window {
+  --cut: 16px;
+  --panel: rgba(30, 4, 16, 0.62);
+  --edge: rgba(255, 59, 107, 0.85);
+  --glow: rgba(255, 59, 107, 0.18);
   position: fixed;
   width: min(320px, calc(100vw - 16px));
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
   pointer-events: auto;
   overflow: hidden;
 }
@@ -248,10 +502,12 @@ tr.row-alert td {
 }
 
 .alert-window-header {
-  background: var(--alert);
-  color: white;
-  padding: 0.6rem 0.9rem;
-  font-weight: 600;
+  background: linear-gradient(90deg, rgba(255, 59, 107, 0.85), rgba(255, 43, 214, 0.55));
+  color: #fff;
+  padding: 0.6rem 0.9rem 0.6rem 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
   cursor: grab;
   user-select: none;
 }
@@ -272,13 +528,19 @@ tr.row-alert td {
 }
 
 .alert-window-dismiss {
-  background: var(--alert);
+  --panel: rgba(255, 59, 107, 0.18);
+  --edge: rgba(255, 59, 107, 0.9);
+  --glow: rgba(255, 59, 107, 0.2);
+  color: #ffc2d1;
 }
 
+/* ===== 設定モーダル ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(2, 6, 15, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,18 +548,24 @@ tr.row-alert td {
 }
 
 .modal {
-  background: var(--surface);
-  border-radius: 12px;
+  --cut: 20px;
+  --panel: rgba(6, 16, 32, 0.72);
+  position: relative;
   padding: 1.75rem;
-  max-width: 460px;
+  max-width: 480px;
   width: 90%;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  scrollbar-color: var(--edge) transparent;
+  scrollbar-width: thin;
 }
 
 .modal h2 {
   margin-top: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
 }
 
 .settings-hint {
@@ -314,8 +582,10 @@ tr.row-alert td {
 }
 
 .settings-row {
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  --cut: 10px;
+  --panel: rgba(0, 240, 255, 0.04);
+  --edge: rgba(0, 240, 255, 0.3);
+  --glow: transparent;
   padding: 0.7rem 0.9rem;
 }
 
@@ -335,6 +605,10 @@ tr.row-alert td {
   cursor: pointer;
 }
 
+.settings-row-header input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
 .settings-row-header .sound-toggle {
   color: var(--muted);
   font-size: 0.85rem;
@@ -349,10 +623,16 @@ tr.row-alert td {
 .settings-row-threshold input[type="number"] {
   width: 5rem;
   padding: 0.2rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--font-mono);
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--accent);
+}
+
+.settings-row-threshold input[type="number"]:focus {
+  outline: 1px solid var(--accent);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
 }
 
 .settings-actions {
@@ -362,16 +642,21 @@ tr.row-alert td {
 }
 
 .settings-actions button.secondary {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
+  --panel: rgba(116, 166, 186, 0.08);
+  --edge: rgba(116, 166, 186, 0.55);
+  --glow: transparent;
+  color: var(--muted);
 }
 
-.dns-update-detail{font-size:.85rem;line-height:1.55;margin-top:8px;color:#666}.dns-update-detail div{margin:3px 0}.dns-update-detail a{display:inline-block;margin-top:5px}.dns-update-detail strong{color:inherit}
-.dns-targets-card{margin-bottom:1rem}.dns-target-list{margin:.5rem 0;padding-left:1.4rem}.dns-target-list ul{margin:.25rem 0;padding-left:1.4rem}.small-note{font-size:.85rem;color:#666}
+/* ===== 動きを減らす設定 / 狭い画面 ===== */
+@media (prefers-reduced-motion: reduce) {
+  .card.alert { animation: none; }
+  button { transition: none; }
+}
 
 @media (max-width: 600px) {
   header { padding: 1rem 1rem 0.75rem; }
+  header h1 { font-size: 1.4rem; }
   main { padding: 0 1rem 2rem; }
   .section-title { padding: 0 1rem; }
   th, td { padding: 0.5rem 0.6rem; }
